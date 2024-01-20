@@ -12,24 +12,61 @@
 
 {% elif "completo" in request.form %}
     {% set autofocus = false %}
-    {% set item = itens.[request.form.completo] %}
-    {% set _ = itens.update({item.id:{"id": item.id, "texto": item.texto, "completo": not item.completo}}) %}
+    {% set item = itens[request.form.completo] %}
+    {% set _ = itens.update({item.id: {"id": item.id, "texto": item.texto, "completo": not item.completo}}) %}
     
 {% elif "default" in request.form %}
     {# Entra com o ENTER #}
     {% if request.form.novoitem|length %}
         {# Cria novo item #}
         {% set novaid = "1" if itens|length == 0 else (itens|max|int + 1)|string %}
-        {% set _ = itens.update({novoide: {"id": novoid, "texto": request.form.novoitem, "completo": false}}) %}
+        {% set _ = itens.update({novaid: {"id": novaid, "texto": request.form.novoitem, "completo": false}}) %}
 
     {% else %}
         {# Salvar item alterado #}
         {% set autofocus = false %}
-        {% for id, item in itens.itens() if item.texto != request.form["item - "~id] %}
+        {% for id, item in itens.items() if item.texto != request.form["item - "~id] %}
             {% set _ = itens.update({id: {"id": id, "texto": request.form["item - "~id], "completo": item.completo}}) %}
         {% endfor %}
     {% endif %}
 {% endif %}
 {# fim jinja ações #}
 
+{# HTMX-Flask-Template #}
+{% if "HX-Request" not in request.headers %}
+    {% extends "base.html" %}
+{% endif %}
 
+{% block main %}
+
+<form method="post" hx-post="{{request.path}}" autocomplete="off">
+    <h3 class="text-center my-3">Uma lista feita em Flask HTMX Jinja</h3>
+    <div class="input-group input-group-sm">
+        <input type="text" name="novoitem" class="form-control" {{'autofocus' if autofocus}}>
+        <button name="default" class="btn btn-outline-primary"><i class="bi-plus"></i></button>
+    </div>
+
+    <div>
+        {% for id, item in itens.items() %}
+        <div class="input-group input-group-sm mt-1">
+            <button class="btn btn-light" name="completo" value="{{id}}" ><i class="bi-check"></i></button>
+            <input type="text" name="item - {{id}}" class="form-control" value="{{item.texto}}" {{'autofocus' if autofocus and item.completo}}>
+            <button class="btn btn-outline-danger" name="apagar" value="{{id}}" ><i class="bi-trash"></i></button>
+        </div>
+        {% else %}
+        {% if finalizado %}
+        <div class="alert alert-success text-center mt-3" role="alert">
+            <h4 class="alert-heading">Parabéns!</h4>
+            <p>Você concluiu todas as tarefas!</p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+    {% endfor %}
+    </div>
+
+    {# save state #}
+    {{ salvar_valor(items) }}
+
+</form>
+    
+{% endblock %}
