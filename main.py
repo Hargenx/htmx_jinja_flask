@@ -18,14 +18,15 @@ def get_valor():
 def estado_salvo(estado) -> str:
     return Markup(f'<input type="hidden" name="estado" value="{serializar(estado)}">')
 
+@app.template_filter()
+def serializar(valor) -> str:
+    return base64.b64encode(zlib.compress(json.dumps(valor).encode())).decode()
+
 
 @app.template_filter()
 def desserializar(valor: str):
     return json.loads(zlib.decompress(base64.b64decode(valor)))
 
-@app.template_filter()
-def serializar(valor) -> str:
-    return base64.b64encode(zlib.compress(json.dumps(valor).encode())).decode()
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=88, debug=True)

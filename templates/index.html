@@ -25,8 +25,8 @@
     {% else %}
         {# Salvar item alterado #}
         {% set autofocus = false %}
-        {% for id, item in itens.items() if item.texto != request.form["item - "~id] %}
-            {% set _ = itens.update({id: {"id": id, "texto": request.form["item - "~id], "completo": item.completo}}) %}
+        {% for id, item in itens.items() if item.texto != request.form["item-"~id] %}
+            {% set _ = itens.update({id: {"id": id, "texto": request.form["item-"~id], "completo": item.completo}}) %}
         {% endfor %}
     {% endif %}
 {% endif %}
@@ -50,7 +50,8 @@
         {% for id, item in itens.items() %}
         <div class="input-group input-group-sm mt-1">
             <button class="btn btn-light" name="completo" value="{{id}}" ><i class="bi-check"></i></button>
-            <input type="text" name="item - {{id}}" class="form-control" value="{{item.texto}}" {{'autofocus' if autofocus and item.completo}}>
+            <!--<input type="text" name="item-{{id}}" class="form-control" value="{{item.texto}}" {{'autofocus' if autofocus and item.completo}}>-->
+            <input type="text" name="item-{{id}}" class="border-0 form-control {{'text-decoration-line-through' if item.completo}}" value="{{item.texto}}">
             <button class="btn btn-outline-danger" name="apagar" value="{{id}}" ><i class="bi-trash"></i></button>
         </div>
         {% else %}
@@ -65,7 +66,7 @@
     </div>
 
     {# save state #}
-    {{ salvar_valor(items) }}
+    {{ salvar_valor(itens) }}
 
 </form>
     
